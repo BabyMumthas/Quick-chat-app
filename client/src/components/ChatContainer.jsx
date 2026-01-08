@@ -1,6 +1,14 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import assets, { messagesDummyData } from "../assets/assets";
 const ChatContainer = ({ selectedUser, setSelectedUser }) => {
+  const scrollEnd = useRef();
+
+  useEffect(() => {
+    if (scrollEnd.current) {
+      scrollEnd.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
   return selectedUser ? (
     <div className="h-full overflow-scroll relative backdrop-blur-lg">
       {/*-----------------------header-----------------------*/}
@@ -58,6 +66,7 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
             </div>
           </div>
         ))}
+        <div ref={scrollEnd}></div>
       </div>
     </div>
   ) : (
