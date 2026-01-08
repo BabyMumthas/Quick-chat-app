@@ -1,5 +1,5 @@
 import React from "react";
-import asset, { userDummyData } from "../assets/assets";
+import assets, { userDummyData } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 
 const SideBar = ({ selectedUser, setSelectedUser }) => {
@@ -13,10 +13,10 @@ const SideBar = ({ selectedUser, setSelectedUser }) => {
     >
       <div className="pb-5">
         <div className="flex justify-between items-center">
-          <img src={asset.logo} alt="logo" className="max-w-40" />
+          <img src={assets.logo} alt="logo" className="max-w-40" />
           <div className="relative py-2 group">
             <img
-              src={asset.menu_icon}
+              src={assets.menu_icon}
               alt="menu"
               className="max-h-5 cursor-pointer"
             />
@@ -34,7 +34,7 @@ const SideBar = ({ selectedUser, setSelectedUser }) => {
         </div>
 
         <div className="bg-[#282142] rounded-full flex items-centre gap-2 py-3 px-4 mt-5 ">
-          <img src={asset.search_icon} alt="search" className="w-3" />
+          <img src={assets.search_icon} alt="search" className="w-3" />
           <input
             type="text"
             className="bg-transparent border-none outline-none text-white text-xs placeholder-[#c8c8c8] flex-1 "
@@ -45,7 +45,9 @@ const SideBar = ({ selectedUser, setSelectedUser }) => {
 
       <div className="flex flex-col">
         {userDummyData.map((user, index) => (
-          <div></div>
+          <div>
+            <img src={user?.profilePic || assets.avatar_icon} alt="" />
+          </div>
         ))}
       </div>
     </div>
