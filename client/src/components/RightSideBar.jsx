@@ -34,7 +34,7 @@ const RightSideBar = ({ selectedUser }) => {
                 onClick={() => window.open(url)}
                 className="cursor-pointer rounded"
               >
-                <img src={url} alt="" className="h-full rounded-md" />
+                <img src={url} alt="" className="h-full " />
               </div>
             ))}
           </div>
