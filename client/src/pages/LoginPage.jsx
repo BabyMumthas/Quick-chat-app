@@ -59,12 +59,12 @@ const LoginPage = () => {
             className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="provide a short bio..."
             required
-          ></textarea>
+          />
         )}
 
         <button
           type="submit"
-          className="py-3 bg-linear-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer"
+          className="py-3 bg-gradient-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer"
         >
           {currState === "Sign up" ? "Create Account" : "Login Now"}
         </button>
@@ -72,6 +72,31 @@ const LoginPage = () => {
         <div className="flex items-center gap-2 text-gray-500">
           <input type="checkbox" />
           <p>Agree to the terms of use & privacy policy.</p>
+        </div>
+        <div className="flex flex-col gap-2">
+          {currState === "Sign up" ? (
+            <p className="text-sm text-gray-600">
+              Already have an account?{" "}
+              <span
+                onClick={() => {
+                  setCurrState("Login"), setIsDataSubmitted(false);
+                }}
+                className="font-medium text-violet-500 cursor-pointer"
+              >
+                Login here
+              </span>
+            </p>
+          ) : (
+            <p className="text-sm text-gray-800">
+              Create an account{" "}
+              <span
+                onClick={() => setCurrState("Sign up")}
+                className="font-medium text-violet-950 cursor-pointer"
+              >
+                Click here
+              </span>
+            </p>
+          )}
         </div>
       </form>
     </div>
