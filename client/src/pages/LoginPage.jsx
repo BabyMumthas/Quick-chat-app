@@ -51,6 +51,28 @@ const LoginPage = () => {
             />
           </>
         )}
+        {currState === "Sign up" && isDataSubmitted && (
+          <textarea
+            onChange={(e) => setBio(e.target.value)}
+            value={bio}
+            rows={4}
+            className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="provide a short bio..."
+            required
+          ></textarea>
+        )}
+
+        <button
+          type="submit"
+          className="py-3 bg-linear-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer"
+        >
+          {currState === "Sign up" ? "Create Account" : "Login Now"}
+        </button>
+
+        <div className="flex items-center gap-2 text-gray-500">
+          <input type="checkbox" />
+          <p>Agree to the terms of use & privacy policy.</p>
+        </div>
       </form>
     </div>
   );
