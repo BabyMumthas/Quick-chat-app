@@ -1,7 +1,7 @@
-import User from "../models/User";
+import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 // Middleware to protect routes
-export const productRoute = async (req, res, next) => {
+export const protectRoute = async (req, res, next) => {
     try {
         const token = req.header.token;
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -9,9 +9,10 @@ export const productRoute = async (req, res, next) => {
 
         if (!user) {
             return res.json({ success: false, message: "User not found" });
-            res.user = user;
-            next();
         }
+
+        res.user = user;
+        next();
 
     } catch (error) {
         console.log(error.message);

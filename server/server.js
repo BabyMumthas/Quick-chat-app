@@ -4,8 +4,8 @@ import cors from "cors";
 import http from "http";
 import { connectDB } from "./lib/db.js";
 import userRoutes from "./routes/userRoutes.js";
-import { server } from "socket.io";
-import { use } from "react";
+import { Server } from "socket.io";
+import messageRoutes from "./routes/messageRoutes.js";
 
 
 
@@ -14,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 
 //initialize socket io server
-export const io = new server.Server(server, {
+export const io = new Server(server, {
     cors: {
         origin: "*"
     }

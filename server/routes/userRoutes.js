@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkAuth, Login, Signup, updateProfile } from '../controllers/userController';
+import { checkAuth, Login, Signup, updateProfile } from '../controllers/userController.js';
 import { protectRoute } from '../middleware/auth.js';
 
 
