@@ -10,3 +10,7 @@ userRoutes.post("/signUp", Signup)
 userRoutes.post("/login", Login)
 userRoutes.put("/update-profile", protectRoute, updateProfile)
 userRoutes.get("/check", protectRoute, checkAuth);
+
+
+export default userRoutes;
+
