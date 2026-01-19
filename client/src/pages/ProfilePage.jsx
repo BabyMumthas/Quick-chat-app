@@ -1,34 +1,57 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import assets from "../assets/assets";
 import { AuthContext } from "../../context/AuthContext";
+import { toast } from "react-hot-toast"; // Add this import
 
 const ProfilePage = () => {
-  const [selectedImg, setSelectedImg] = useState(null);
   const navigate = useNavigate();
-  const [name, setName] = useState("Martin Johnson");
-  const [bio, setBio] = useState("Hi Everyone, I am Using QuickChat");
 
+  // Get authUser FIRST before using it
   const { authUser, updateProfile } = useContext(AuthContext);
+
+  // NOW you can use authUser in useState
+  const [selectedImg, setSelectedImg] = useState(null);
+  const [name, setName] = useState(authUser?.fullName || "");
+  const [bio, setBio] = useState(authUser?.bio || "");
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedImg) {
-      await updateProfile({ fullName: name, bio });
-      navigate("/");
-      return;
+    setLoading(true);
+
+    try {
+      if (!selectedImg) {
+        await updateProfile({ fullName: name, bio });
+      } else {
+        const reader = new FileReader();
+        reader.readAsDataURL(selectedImg);
+        reader.onloadend = async () => {
+          const base64Image = reader.result;
+          await updateProfile({
+            profilePic: base64Image,
+            fullName: name,
+            bio,
+          });
+
+          // Wait a bit for toast to show, then navigate
+          setTimeout(() => {
+            navigate("/");
+          }, 1500);
+        };
+        setLoading(false);
+        return; // Exit early for file upload case
+      }
+
+      // Wait a bit for toast to show, then navigate
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+    } catch (error) {
+      toast.error("Failed to update profile");
+    } finally {
+      setLoading(false);
     }
-    const reader = new FileReader();
-    reader.readAsDataURL(selectedImg);
-    reader.onloadend = async () => {
-      const base64Image = reader.result;
-      await updateProfile({
-        profilePic: base64Image,
-        fullName: name,
-        bio,
-      });
-      navigate("/");
-    };
   };
 
   return (
@@ -54,10 +77,10 @@ const ProfilePage = () => {
               src={
                 selectedImg
                   ? URL.createObjectURL(selectedImg)
-                  : assets.avatar_icon
+                  : authUser?.profilePic || assets.avatar_icon
               }
               alt=""
-              className={`w-12 h-12 ${selectedImg && "rounded-full"}`}
+              className={`w-12 h-12 ${selectedImg ? "rounded-full" : ""}`}
             />
             upload profile image
           </label>
@@ -80,15 +103,20 @@ const ProfilePage = () => {
 
           <button
             type="submit"
-            className="bg-gradient-to-r from-purple-400 to-violet-600 text-white p-2 rounded-full text-lg cursor-pointer"
+            disabled={loading}
+            className="bg-gradient-to-r from-purple-400 to-violet-600 text-white p-2 rounded-full text-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save
+            {loading ? "Saving..." : "Save"}
           </button>
         </form>
 
         <img
-          className="max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10"
-          src={assets.logo_icon}
+          className={`max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10`}
+          src={
+            selectedImg
+              ? URL.createObjectURL(selectedImg)
+              : authUser?.profilePic || assets.logo_icon
+          }
           alt=""
         />
       </div>
