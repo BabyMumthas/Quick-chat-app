@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 // Middleware to protect routes
 export const protectRoute = async (req, res, next) => {
     try {
-        const token = req.header.token;
+        const token = req.headers.token;
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(decoded.userId).select("-password");
 
@@ -11,7 +11,7 @@ export const protectRoute = async (req, res, next) => {
             return res.json({ success: false, message: "User not found" });
         }
 
-        res.user = user;
+        req.user = user;
         next();
 
     } catch (error) {
