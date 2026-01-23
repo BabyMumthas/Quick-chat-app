@@ -13,6 +13,14 @@ const ChatContainer = () => {
   const scrollEnd = useRef();
 
   const [input, setInput] = useState("");
+  // Handle sending a message
+const handleSendMessage = async (e) => {
+  e.preventDefault();
+  if (input.trim() === "") return null;
+  await sendMessage({ text: input.trim() });
+  setInput("");
+};
+
   
 
   useEffect(() => {
