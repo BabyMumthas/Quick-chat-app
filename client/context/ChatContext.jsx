@@ -8,22 +8,22 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [selectedChatUser, setSelectedChatUser] = useState(null);
-  const [unseenMessages, setUnseenMessages] = useState({}); 
+  const [unseenMessages, setUnseenMessages] = useState({});
 
-  const { socket, axios } = useContext(AuthContext); 
+  const { socket, axios } = useContext(AuthContext);
 
   // Function to get all users for side bar
   const getUsers = async () => {
     try {
-      const { data } = await axios.get("/api/messages/users"); 
+      const { data } = await axios.get("/api/messages/users");
       if (data.success) {
         setUsers(data.users);
         setUnseenMessages(data.unseenMessages);
       }
     } catch (error) {
-      toast.error(error.message); 
+      toast.error(error.message);
     }
-  }; 
+  };
 
   // Function to get messages for selected user
   const getMessages = async (userId) => {
@@ -33,13 +33,38 @@ export const ChatProvider = ({ children }) => {
         setMessages(data.messages);
       }
     } catch (error) {
-      toast.error(error.message); 
+      toast.error(error.message);
+    }
+  };
+
+  //function to send message to user
+
+  const sendMessage = async (messageData) => {
+    try {
+      const { data } = await axios.post(
+        `/api/messages/send/${selectedChatUser._id}`,
+        messageData,
+      );
+      if (data.success) {
+        // Update messages state with the new message
+        setMessages((prevMessages) => [...prevMessages, data.newMessage]);
+      } else {
+        toast.error(error.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
   const value = {
-    
+    messages,
+    users,
+    selectedChatUser,
+    setSelectedChatUser,
+    unseenMessages,
+    getUsers,
+    getMessages,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
-}; 
+};
