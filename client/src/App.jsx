@@ -9,11 +9,28 @@ import { AuthContext } from "../context/AuthContext";
 const App = () => {
   const { authUser } = useContext(AuthContext);
 
-  console.log("Current authUser:", authUser); // Debug log
+  // console.log("Current authUser:", authUser); // REMOVE THIS LINE
 
   return (
     <div className="bg-[url('./src/assets/bgImage.svg')] bg-contain">
-      <Toaster />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          success: {
+            style: {
+              background: "#22c55e",
+              color: "white",
+            },
+          },
+          error: {
+            style: {
+              background: "#ef4444",
+              color: "white",
+            },
+          },
+        }}
+      />
       <Routes>
         <Route
           path="/"

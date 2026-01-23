@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { io } from "socket.io-client";
@@ -16,12 +16,15 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Check if user is authenticated
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const { data } = await axios.get("/api/auth/check");
       if (data.success) {
         setAuthUser(data.user);
-        connectSocket(data.user);
+        // Don't call connectSocket here if socket already exists
+        if (!socket && data.user) {
+          connectSocketInternal(data.user);
+        }
       }
     } catch (error) {
       console.log("Not authenticated");
@@ -29,7 +32,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [socket]);
 
   // Login function
   const login = async (state, credentials) => {
@@ -38,7 +41,6 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         setAuthUser(data.userData);
-        connectSocket(data.userData);
         axios.defaults.headers.common["token"] = data.token;
         setToken(data.token);
         localStorage.setItem("token", data.token);
@@ -72,33 +74,55 @@ export const AuthProvider = ({ children }) => {
       const { data } = await axios.put("/api/auth/update-profile", body);
       if (data.success) {
         setAuthUser(data.user);
+        toast.success("Profile updated successfully");
         return data.user;
       } else {
         throw new Error(data.message);
       }
     } catch (error) {
-      console.error(error);
-      throw error; // Let component handle the error
+      toast.error(error.response?.data?.message || error.message);
+      throw error;
     }
   };
 
-  // Connect socket
-  const connectSocket = (userData) => {
-    if (!userData || !userData._id) return;
-    if (socket?.connected) return;
+  // Internal connect socket function
+  const connectSocketInternal = useCallback(
+    (userData) => {
+      if (!userData || !userData._id) return;
+      if (socket?.connected) return;
 
-    const newSocket = io(backendUrl, {
-      query: { userId: userData._id },
-    });
+      console.log("Connecting socket for user:", userData._id);
 
-    newSocket.connect();
-    setSocket(newSocket);
+      const newSocket = io(backendUrl, {
+        query: { userId: userData._id },
+      });
 
-    newSocket.on("getOnlineUsers", (usersId) => {
-      setOnlineUsers(usersId);
-    });
-  };
+      newSocket.connect();
+      setSocket(newSocket);
 
+      newSocket.on("getOnlineUsers", (usersId) => {
+        setOnlineUsers(usersId);
+      });
+
+      newSocket.on("connect", () => {
+        console.log("Socket connected");
+      });
+
+      newSocket.on("disconnect", () => {
+        console.log("Socket disconnected");
+      });
+    },
+    [socket, backendUrl],
+  );
+
+  // Effect to connect socket when authUser changes
+  useEffect(() => {
+    if (authUser && !socket) {
+      connectSocketInternal(authUser);
+    }
+  }, [authUser, socket, connectSocketInternal]);
+
+  // Effect to check auth on mount
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common["token"] = token;
@@ -106,7 +130,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
-  }, [token]);
+  }, [token]); // Only run when token changes
 
   const value = {
     axios,

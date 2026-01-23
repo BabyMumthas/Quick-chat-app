@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from "react"; // Combined imports
+import { createContext, useState, useContext, useEffect, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
 import toast from "react-hot-toast";
 
@@ -13,7 +13,7 @@ export const ChatProvider = ({ children }) => {
   const { socket, axios } = useContext(AuthContext);
 
   // Function to get all users for side bar
-  const getUsers = async () => {
+  const getUsers = useCallback(async () => {
     try {
       const { data } = await axios.get("/api/messages/users");
       if (data.success) {
@@ -21,71 +21,65 @@ export const ChatProvider = ({ children }) => {
         setUnseenMessages(data.unseenMessages);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
-  };
+  }, [axios]);
 
   // Function to get messages for selected user
-  const getMessages = async (userId) => {
+  const getMessages = useCallback(async (userId) => {
     try {
       const { data } = await axios.get(`/api/messages/${userId}`);
       if (data.success) {
         setMessages(data.messages);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
-  };
+  }, [axios]);
 
   // Function to send message to user
-  const sendMessage = async (messageData) => {
+  const sendMessage = useCallback(async (messageData) => {
+    if (!selectedUser) return;
+    
     try {
       const { data } = await axios.post(
         `/api/messages/send/${selectedUser._id}`,
-        messageData,
+        messageData
       );
       if (data.success) {
-        // Update messages state with the new message
         setMessages((prevMessages) => [...prevMessages, data.newMessage]);
       } else {
-        toast.error(data.message); // Fixed: use data.message instead of error.message
+        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
-  };
+  }, [axios, selectedUser]);
 
-  // Function to subscribe to messages for selected user
-  const subscribeToMessages = () => {
-    // Fixed: typo "subscriberToMessages"
+  // Subscribe to socket messages - CRITICAL FIX
+  useEffect(() => {
     if (!socket) return;
 
-    socket.on("newMessage", (newMessage) => {
+    const handleNewMessage = (newMessage) => {
       if (selectedUser && newMessage.senderId === selectedUser._id) {
-        // Fixed: senderId and selectedUser._id
         newMessage.seen = true;
         setMessages((prevMessages) => [...prevMessages, newMessage]);
         axios.put(`/api/messages/mark/${newMessage._id}`);
       } else {
         setUnseenMessages((prevUnseenMessages) => ({
           ...prevUnseenMessages,
-          [newMessage.senderId]: prevUnseenMessages[newMessage.senderId]
-            ? prevUnseenMessages[newMessage.senderId] + 1
-            : 1,
+          [newMessage.senderId]: (prevUnseenMessages[newMessage.senderId] || 0) + 1,
         }));
       }
-    });
-  };
+    };
 
-  // Function to unsubscribe from messages
-  const unsubscribeFromMessages = () => {
-    if (socket) socket.off("newMessage"); // Fixed: lowercase "newMessage"
-  };
+    socket.on("newMessage", handleNewMessage);
 
-  useEffect(() => {
-    subscribeToMessages(); // Fixed: function name
-    return () => unsubscribeFromMessages();
-  }, [socket, selectedUser]);
+    // Cleanup function
+    return () => {
+      socket.off("newMessage", handleNewMessage);
+    };
+  }, [socket, selectedUser, axios]);
 
   const value = {
     messages,
@@ -95,7 +89,7 @@ export const ChatProvider = ({ children }) => {
     unseenMessages,
     setUnseenMessages,
     getUsers,
-    getMessages, // Added missing
+    getMessages,
     setMessages,
     sendMessage,
   };
