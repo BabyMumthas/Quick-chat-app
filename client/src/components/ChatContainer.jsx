@@ -14,14 +14,31 @@ const ChatContainer = () => {
 
   const [input, setInput] = useState("");
   // Handle sending a message
-const handleSendMessage = async (e) => {
-  e.preventDefault();
-  if (input.trim() === "") return null;
-  await sendMessage({ text: input.trim() });
-  setInput("");
-};
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (input.trim() === "") return null;
+    await sendMessage({ text: input.trim() });
+    setInput("");
+  };
 
-  
+  // Handle sending an image
+  const handleSendImage = async (e) => {
+    const file = e.target.files[0];
+
+    if (!file || !file.type.startsWith("image/")) {
+      toast.error("select an image file");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onloadend = async () => {
+      await sendMessage({ image: reader.result });
+      e.target.value = "";
+    };
+
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (scrollEnd.current) {
