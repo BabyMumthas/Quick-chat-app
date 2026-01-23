@@ -1,8 +1,19 @@
-import React, { useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import assets, { messagesDummyData } from "../assets/assets";
 import { fromMessageTime } from "../lib/utils";
-const ChatContainer = ({ selectedUser, setSelectedUser }) => {
+import { ChatContext } from "../../context/ChatContext";
+import { AuthContext } from "../../context/AuthContext";
+
+const ChatContainer = () => {
+  const { messages, selectedUser, setSelectedUser, sendMessage, getMessages } =
+    useContext(ChatContext);
+
+  const { authUser, onlineUsers } = useContext(AuthContext);
+
   const scrollEnd = useRef();
+
+  const [input, setInput] = useState("");
+  
 
   useEffect(() => {
     if (scrollEnd.current) {
@@ -80,8 +91,16 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
           <input
             type="text"
             placeholder="Send a message"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSendMessage(e);
+              }
+            }}
             className="flex-1 text-sm p-3 border-none rounded-lg outline-none text-white placeholder-gray-400"
           />
+
           <input type="file" id="image" accept="image/png, image/jpeg" hidden />
           <label htmlFor="image">
             <img
