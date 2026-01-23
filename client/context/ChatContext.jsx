@@ -1,7 +1,6 @@
-import { createContext, useState, useContext } from "react"; // Missing useState and useContext imports
+import { createContext, useState, useContext, useEffect } from "react"; // Combined imports
 import { AuthContext } from "./AuthContext";
 import toast from "react-hot-toast";
-import { useEffect } from "react";
 
 export const ChatContext = createContext();
 
@@ -38,8 +37,7 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  //function to send message to user
-
+  // Function to send message to user
   const sendMessage = async (messageData) => {
     try {
       const { data } = await axios.post(
@@ -50,20 +48,21 @@ export const ChatProvider = ({ children }) => {
         // Update messages state with the new message
         setMessages((prevMessages) => [...prevMessages, data.newMessage]);
       } else {
-        toast.error(error.message);
+        toast.error(data.message); // Fixed: use data.message instead of error.message
       }
     } catch (error) {
       toast.error(error.message);
     }
   };
 
-  //function to subscribe to message for selected user
-
-  const subscriberToMessages = () => {
+  // Function to subscribe to messages for selected user
+  const subscribeToMessages = () => {
+    // Fixed: typo "subscriberToMessages"
     if (!socket) return;
 
     socket.on("newMessage", (newMessage) => {
-      if (selectedUser && newMessage.sederId === selectedUser_id) {
+      if (selectedUser && newMessage.senderId === selectedUser._id) {
+        // Fixed: senderId and selectedUser._id
         newMessage.seen = true;
         setMessages((prevMessages) => [...prevMessages, newMessage]);
         axios.put(`/api/messages/mark/${newMessage._id}`);
@@ -78,14 +77,13 @@ export const ChatProvider = ({ children }) => {
     });
   };
 
-  //function to unsubscribe from messages
-
+  // Function to unsubscribe from messages
   const unsubscribeFromMessages = () => {
-    if (socket) socket.off("NewMessage");
+    if (socket) socket.off("newMessage"); // Fixed: lowercase "newMessage"
   };
 
   useEffect(() => {
-    subscriberToMessages();
+    subscribeToMessages(); // Fixed: function name
     return () => unsubscribeFromMessages();
   }, [socket, selectedUser]);
 
@@ -93,12 +91,13 @@ export const ChatProvider = ({ children }) => {
     messages,
     users,
     selectedUser,
-    getUsers,
-    setMessages,
-    sendMessage,
     setSelectedUser,
     unseenMessages,
     setUnseenMessages,
+    getUsers,
+    getMessages, // Added missing
+    setMessages,
+    sendMessage,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
