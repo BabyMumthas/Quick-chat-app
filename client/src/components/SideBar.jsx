@@ -1,16 +1,15 @@
 import assets from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { ChatContext } from "../../context/ChatContext";
-import { useEffect } from "react";
 
 const SideBar = () => {
   const {
     getUsers,
     users,
-    selectedUser, // ✅ Correct
-    setSelectedUser, // ✅ Correct
+    selectedUser,
+    setSelectedUser,
     unseenMessages,
     setUnseenMessages,
   } = useContext(ChatContext);
@@ -28,7 +27,7 @@ const SideBar = () => {
 
   useEffect(() => {
     getUsers();
-  }, [onlineUsers]);
+  }, []); // Only call once on mount, not on every onlineUsers change
 
   return (
     <div
@@ -76,16 +75,21 @@ const SideBar = () => {
         {filteredUsers.map((user, index) => (
           <div
             key={user._id || index}
-            onClick={() => setSelectedUser(user)}
+            onClick={() => {
+              setSelectedUser(user);
+              setUnseenMessages((prev) => ({
+                ...prev,
+                [user._id]: 0,
+              }));
+            }}
             className={`relative flex items-center gap-2 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${
-              selectedUser?._id === user._id &&
-              "bg-[#282142]/50" /* ✅ Correct */
+              selectedUser?._id === user._id && "bg-[#282142]/50"
             } `}
           >
             <img
               src={user?.profilePic || assets.avatar_icon}
               alt=""
-              className="w-8.75 aspect-square rounded-full "
+              className="w-8.75 aspect-square rounded-full object-cover"
             />
             <div className="flex flex-col leading-5">
               <p>{user.fullName}</p>
