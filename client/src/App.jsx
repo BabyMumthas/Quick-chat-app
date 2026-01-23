@@ -12,7 +12,7 @@ const App = () => {
   // console.log("Current authUser:", authUser); // REMOVE THIS LINE
 
   return (
-    <div className="bg-[url('./src/assets/bgImage.svg')] bg-contain">
+    <div className="bg-[url('/bgImage.svg')] bg-contain">
       <Toaster
         position="top-center"
         toastOptions={{
