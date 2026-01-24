@@ -76,13 +76,6 @@ src/
 ⚙️ Installation & Setup
 ------------------------
 
-Clone the repository
----
-
-git clone https://github.com/your-username/chat-app.git
-cd chat-app
-
-
 Install dependencies
 ---
 
@@ -132,3 +125,4 @@ Typing indicators
 Read receipts
 
 Dark / light mode
+
